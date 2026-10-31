@@ -2,13 +2,54 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio 1</title>
-    <meta name="description" content="Portfolio de ejemplo hecho por Sooma." />
+    <title>Inés Varela — Fotógrafa en Rosario</title>
+    <meta
+      name="description"
+      content="Inés Varela, fotógrafa de Rosario. Retrato, fotografía documental y editorial en blanco y negro, con luz natural y grano. Trabaja en todo el país."
+    />
+    <meta name="theme-color" content="#0d0c0b" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content="Inés Varela — Fotógrafa en Rosario" />
+    <meta
+      property="og:description"
+      content="Retrato, documental y editorial. Despacio, mirando mucho antes de disparar."
+    />
+    <meta property="og:image" content="/img/hero/hero-1200.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="812" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="preload"
+      as="image"
+      href="/img/hero/hero.jpg"
+      imagesrcset="/img/hero/hero-1200.jpg 1200w, /img/hero/hero.jpg 2400w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Mono:wght@400;500&family=Reenie+Beanie&display=swap"
+    />
   </head>
   <body>
     <div id="root"></div>
+    <!-- Formulario estático para que Netlify Forms detecte los campos del sobre. -->
+    <form name="sobre" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="sobre" />
+      <input name="bot-field" />
+      <input name="nombre" />
+      <input name="email" type="email" />
+      <input name="tipo" />
+      <input name="fecha" />
+      <textarea name="mensaje"></textarea>
+    </form>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
