@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "portfolio1", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5181 },
+    { "name": "portfolio1-existente", "url": "http://localhost:5181" }
+  ]
+}
