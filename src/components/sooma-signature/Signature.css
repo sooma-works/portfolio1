@@ -1,0 +1,115 @@
+:root {
+  --sooma-paper: #f6f1ec;
+  --sooma-ochre: #d9a24b;
+}
+
+.signature {
+  color: var(--sooma-paper);
+  font:
+    600 20px/1 'Bricolage Grotesque',
+    sans-serif;
+  letter-spacing: -0.045em;
+  transition:
+    color 0.2s,
+    transform 0.2s;
+}
+.sig-sooma {
+  color: var(--sooma-ochre);
+}
+.signature--swap {
+  display: inline-flex;
+  align-items: center;
+}
+.sig-mark {
+  display: inline-flex;
+  align-items: center;
+  width: 0;
+  margin-right: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: scale(0.5) rotate(-14deg);
+  animation: sigMark 8s ease-in-out infinite;
+}
+.sig-mark img {
+  width: 32px;
+  height: 32px;
+}
+.sig-hecho {
+  display: inline-block;
+  max-width: 220px;
+  opacity: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: sigHecho 8s ease-in-out infinite;
+}
+@keyframes sigMark {
+  0%,
+  40% {
+    width: 0;
+    margin-right: 0;
+    opacity: 0;
+    transform: scale(0.5) rotate(-14deg);
+  }
+  52%,
+  92% {
+    width: 32px;
+    margin-right: 11px;
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    width: 0;
+    margin-right: 0;
+    opacity: 0;
+    transform: scale(0.5) rotate(-14deg);
+  }
+}
+@keyframes sigHecho {
+  0%,
+  40% {
+    max-width: 220px;
+    opacity: 1;
+  }
+  52%,
+  92% {
+    max-width: 0;
+    opacity: 0;
+  }
+  100% {
+    max-width: 220px;
+    opacity: 1;
+  }
+}
+.logo-dot {
+  color: var(--sooma-ochre);
+}
+
+/*
+  Variantes lisas: todo el lockup (texto, punto y logo) en un solo color.
+  El isotipo es una imagen a color, asi que se lo lleva a blanco/negro
+  puro con un filtro en vez de pedir un SVG nuevo por variante.
+*/
+.signature--white,
+.signature--white .sig-sooma,
+.signature--white .logo-dot {
+  color: #fff;
+}
+.signature--white .sig-mark img {
+  filter: brightness(0) invert(1);
+}
+.signature--black,
+.signature--black .sig-sooma,
+.signature--black .logo-dot {
+  color: #000;
+}
+.signature--black .sig-mark img {
+  filter: brightness(0);
+}
+
+/* Ajuste de zona tactil en mobile, tal como en el sitio original. */
+@media (max-width: 720px) {
+  .signature {
+    padding: 6px 0;
+    margin: -6px 0;
+  }
+}
