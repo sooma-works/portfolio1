@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { series } from '../data/series'
 import { pencilLoop } from '../lib/pencil'
 import { hasFinePointer, prefersReducedMotion } from '../lib/motion'
@@ -9,7 +9,7 @@ import { ShutterLink } from './Shutter'
 const COPIES = 3
 const DRIFT = 12 // px por segundo
 
-function useEndlessStrip(ref, direction, active) {
+function useEndlessStrip(ref, direction, active, onUserScroll) {
   useEffect(() => {
     // Se arma recién cuando la tira está por aparecer: medirla antes fuerza el
     // layout de toda la página justo mientras carga.
@@ -19,6 +19,10 @@ function useEndlessStrip(ref, direction, active) {
     // En pantallas táctiles el rollo no avanza solo: el dedo manda.
     const drifts = hasFinePointer() && !prefersReducedMotion()
     let pos = 0
+    let lastInput = -Infinity
+    const markInput = () => {
+      lastInput = performance.now()
+    }
     let paused = false
     let visible = false
     let resumeTimer = 0
@@ -43,6 +47,9 @@ function useEndlessStrip(ref, direction, active) {
       // Si el scroll quedó donde lo dejamos nosotros, no lo hizo la persona.
       if (Math.abs(el.scrollLeft - Math.round(pos)) <= 1) return
       pos = el.scrollLeft
+      // Solo cuenta como "lo deslizó" si hubo un gesto real hace poco (el imán
+      // y los saltos del rollo infinito también mueven el scroll).
+      if (performance.now() - lastInput < 1500) onUserScroll?.()
       window.clearTimeout(settleTimer)
       settleTimer = window.setTimeout(recenter, 180)
     }
@@ -96,6 +103,9 @@ function useEndlessStrip(ref, direction, active) {
     ro.observe(el)
 
     el.addEventListener('scroll', onScroll, { passive: true })
+    el.addEventListener('touchmove', markInput, { passive: true })
+    el.addEventListener('wheel', markInput, { passive: true })
+    el.addEventListener('pointerdown', markInput)
     el.addEventListener('scrollend', onScrollEnd)
     el.addEventListener('pointerenter', onEnter)
     el.addEventListener('pointerleave', onLeave)
@@ -112,6 +122,9 @@ function useEndlessStrip(ref, direction, active) {
       io.disconnect()
       ro.disconnect()
       el.removeEventListener('scroll', onScroll)
+      el.removeEventListener('touchmove', markInput)
+      el.removeEventListener('wheel', markInput)
+      el.removeEventListener('pointerdown', markInput)
       el.removeEventListener('scrollend', onScrollEnd)
       el.removeEventListener('pointerenter', onEnter)
       el.removeEventListener('pointerleave', onLeave)
@@ -120,7 +133,7 @@ function useEndlessStrip(ref, direction, active) {
       el.removeEventListener('focusin', onFocusIn)
       el.removeEventListener('focusout', onFocusOut)
     }
-  }, [ref, direction, active])
+  }, [ref, direction, active, onUserScroll])
 }
 
 // Con el dedo no hay hover: al tocar un fotograma, el lápiz lo marca y
@@ -130,7 +143,7 @@ const markThenGo = (e) => {
   e.currentTarget.classList.add('is-marked')
 }
 
-function Strip({ s, index }) {
+function Strip({ s, index, hint, onUserScroll }) {
   const frames = [s.cover, ...s.photos]
   const firstFrame = 12 + index * 14
   const scroller = useRef(null)
@@ -151,7 +164,42 @@ function Strip({ s, index }) {
     io.observe(scroller.current)
     return () => io.disconnect()
   }, [])
-  useEndlessStrip(scroller, index % 2 ? -1 : 1, near)
+  // El amague mueve la tira, pero no cuenta como que la persona la deslizó.
+  const nudging = useRef(false)
+  const userScroll = useCallback(() => {
+    if (!nudging.current) onUserScroll?.()
+  }, [onUserScroll])
+  useEndlessStrip(scroller, index % 2 ? -1 : 1, near, userScroll)
+
+  // En touch, la primera tira hace un amague hacia el costado al aparecer:
+  // muestra que el rollo se desliza. El imán la devuelve a la portada.
+  useEffect(() => {
+    if (!hint || !near || hasFinePointer() || prefersReducedMotion()) return
+    const el = scroller.current
+    const timers = []
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        io.disconnect()
+        const d = el.clientWidth * 0.32
+        timers.push(
+          window.setTimeout(() => {
+            nudging.current = true
+            el.scrollBy({ left: d, behavior: 'smooth' })
+          }, 500),
+          window.setTimeout(() => el.scrollBy({ left: -d, behavior: 'smooth' }), 1150),
+          window.setTimeout(() => (nudging.current = false), 2200),
+        )
+      },
+      { threshold: 0.8 },
+    )
+    io.observe(el)
+    return () => {
+      io.disconnect()
+      timers.forEach((t) => window.clearTimeout(t))
+      nudging.current = false
+    }
+  }, [hint, near])
 
   return (
     <div className="strip-row">
@@ -212,11 +260,25 @@ function Strip({ s, index }) {
           </div>
         </div>
       </div>
+      {hint && (
+        <p className="swipe-hint" aria-hidden="true">
+          <span>deslizá el rollo</span>
+          <svg viewBox="0 0 64 20">
+            <path d="M2 11 C14 8 30 13 46 9 S58 10 61 10" />
+            <path d="M52 3 C55 6 58 8 61 10 C58 12 55 14 52 17" />
+          </svg>
+        </p>
+      )}
     </div>
   )
 }
 
 export default function ContactSheet() {
+  // La indicación de deslizar (solo en touch) se va apenas alguien mueve
+  // cualquier tira: ya entendió cómo funciona.
+  const [hint, setHint] = useState(true)
+  const hideHint = useCallback(() => setHint(false), [])
+
   return (
     <section className="sheet-wrap" id="series" aria-labelledby="series-title">
       <div className="sheet">
@@ -230,7 +292,7 @@ export default function ContactSheet() {
           </p>
         </div>
         {series.map((s, i) => (
-          <Strip key={s.slug} s={s} index={i} />
+          <Strip key={s.slug} s={s} index={i} hint={hint && i === 0} onUserScroll={hint ? hideHint : undefined} />
         ))}
       </div>
     </section>

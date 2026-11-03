@@ -627,6 +627,39 @@ body {
     opacity 0s;
 }
 .frame:focus-visible { outline-offset: 6px; }
+/* Indicación de deslizar: una nota a mano con flecha de lápiz graso, solo
+   en pantallas táctiles (con mouse el rollo avanza solo). */
+.swipe-hint {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 10px 4px 0;
+  font-family: var(--font-hand);
+  font-size: 1.45rem;
+  line-height: 1;
+  color: #3a3631;
+}
+.swipe-hint svg {
+  width: 46px;
+  height: 16px;
+  overflow: visible;
+  animation: nudge 1.6s ease-in-out infinite;
+}
+.swipe-hint path {
+  fill: none;
+  stroke: var(--safelight);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(7px); }
+}
+@media (hover: none), (pointer: coarse) {
+  .swipe-hint { display: flex; }
+}
 /* Solo con mouse: en touch el :hover queda "pegado" después de tocar. */
 @media (hover: hover) and (pointer: fine) {
   .frame:hover .pencil path {
@@ -1252,6 +1285,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .grain { animation: none; }
+  .swipe-hint svg { animation: none; }
   .intro { display: none; }
   .hero-crop path { animation: none; stroke-dashoffset: 0; }
   .pencil path { transition-duration: 0.01s !important; }
