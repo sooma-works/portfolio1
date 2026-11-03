@@ -22,7 +22,7 @@ export default function Nav() {
 
   return (
     <header className={`nav${scrolled ? ' is-scrolled' : ''}`}>
-      <ShutterLink to="/" className="nav-mark" aria-label="Inés Varela, inicio">
+      <ShutterLink to="/" className="nav-mark" aria-label="IV · Inés Varela, inicio">
         IV
       </ShutterLink>
       <nav aria-label="Principal">

@@ -27,16 +27,15 @@
       rel="preload"
       as="image"
       href="/img/hero/hero.jpg"
-      imagesrcset="/img/hero/hero-1200.jpg 1200w, /img/hero/hero.jpg 2400w"
+      imagesrcset="/img/hero/hero-800.jpg 800w, /img/hero/hero-1200.jpg 1200w, /img/hero/hero.jpg 2400w"
       imagesizes="100vw"
       fetchpriority="high"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Mono:wght@400;500&family=Reenie+Beanie&display=swap"
-    />
+    <!-- Fuentes sin bloquear el primer render: la intro tapa el cambio. -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Mono:wght@400;500&family=Reenie+Beanie&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Mono:wght@400;500&family=Reenie+Beanie&display=swap" /></noscript>
   </head>
   <body>
     <div id="root"></div>
