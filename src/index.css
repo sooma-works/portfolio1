@@ -317,7 +317,7 @@ body {
   height: 100%;
   overflow: hidden;
 }
-.intro-frame svg { display: block; width: 100%; height: 100%; }
+.intro-canvas { display: block; width: 100%; height: 100%; }
 /* Mismo encuadre que .hero-img: al terminar de crecer, coinciden. */
 .intro-photo {
   position: absolute;
@@ -329,7 +329,7 @@ body {
   opacity: 0;
 }
 .intro:not([data-phase="develop"]) .intro-photo { opacity: 1; }
-.intro:not([data-phase="develop"]) .intro-frame svg { visibility: hidden; }
+.intro:not([data-phase="develop"]) .intro-canvas { visibility: hidden; }
 /* La luz de seguridad tiñe el papel; al apagarse, vuelve a su tono. */
 .intro-paper::after {
   content: "";

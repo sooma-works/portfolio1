@@ -21,9 +21,9 @@ const ease = (t) => 1 - (1 - t) ** 2.2
 export default function Intro() {
   const [mode] = useState(() => (playedThisLoad || prefersReducedMotion() ? 'none' : 'full'))
   const [phase, setPhase] = useState(mode === 'none' ? 'done' : 'develop')
-  const [viewBox, setViewBox] = useState(`0 0 ${hero.w} ${hero.h}`)
-  const funcRef = useRef(null)
-  const imgRef = useRef(null)
+  const canvasRef = useRef(null)
+  // Todo lo que necesita el canvas para pintar un cuadro (se arma al montar).
+  const devRef = useRef(null)
   const paperRef = useRef(null)
   const frameRef = useRef(null)
   const clockRef = useRef(null)
@@ -34,13 +34,30 @@ export default function Intro() {
     window.innerWidth * (window.devicePixelRatio || 1) < 1000 ? hero.mobile : hero.small,
   )
 
+  // Pinta un cuadro del revelado en el canvas. Se hace en canvas (y no con
+  // filtros SVG) porque Safari en iPhone no aplica filtros dentro de una
+  // máscara SVG ni filtros CSS sobre elementos SVG: ahí no se veía nada.
   const paint = (t) => {
     const k = ease(t)
-    // Umbral del ruido: a 0 no pasa nada de imagen, a 1 pasa toda.
-    const intercept = -SLOPE + k * (1 + SLOPE)
-    funcRef.current?.setAttribute('intercept', intercept.toFixed(3))
-    if (imgRef.current) {
-      imgRef.current.style.filter = `brightness(${(2.1 - 1.1 * k).toFixed(3)}) contrast(${(0.45 + 0.55 * k).toFixed(3)})`
+    const dev = devRef.current
+    if (dev?.ready) {
+      // Umbral del ruido: a 0 no pasa nada de imagen, a 1 pasa toda.
+      const intercept = -SLOPE + k * (1 + SLOPE)
+      const { noise, maskData, maskCtx, mask, ctx, photo, crop, w, h } = dev
+      const px = maskData.data
+      for (let i = 0, j = 3; i < noise.length; i++, j += 4) {
+        const a = (SLOPE * noise[i]) / 255 + intercept
+        px[j] = a <= 0 ? 0 : a >= 1 ? 255 : a * 255
+      }
+      maskCtx.putImageData(maskData, 0, 0)
+      ctx.globalCompositeOperation = 'copy'
+      ctx.drawImage(photo, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, w, h)
+      ctx.globalCompositeOperation = 'destination-in'
+      ctx.drawImage(mask, 0, 0, w, h)
+      ctx.globalCompositeOperation = 'source-over'
+    }
+    if (canvasRef.current) {
+      canvasRef.current.style.filter = `brightness(${(2.1 - 1.1 * k).toFixed(3)}) contrast(${(0.45 + 0.55 * k).toFixed(3)})`
     }
     if (clockRef.current) {
       const s = Math.round(t * 90)
@@ -59,14 +76,69 @@ export default function Intro() {
   // copia termina exactamente donde está la foto de fondo.
   useLayoutEffect(() => {
     const frame = frameRef.current
-    if (!frame) return
-    const { width: w, height: h } = frame.getBoundingClientRect()
+    const canvas = canvasRef.current
+    if (!frame || !canvas) return
+    const { width: fw, height: fh } = frame.getBoundingClientRect()
     const x = parseFloat(getComputedStyle(frame).getPropertyValue('--hero-x')) || 0.5
-    const scale = Math.max(w / hero.w, h / hero.h)
-    const vw = w / scale
-    const vh = h / scale
-    setViewBox(`${((hero.w - vw) * x).toFixed(1)} ${((hero.h - vh) / 2).toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`)
-  }, [])
+    const scale = Math.max(fw / hero.w, fh / hero.h)
+    const vw = fw / scale
+    const vh = fh / scale
+    const vx = (hero.w - vw) * x
+    const vy = (hero.h - vh) / 2
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const w = Math.round(fw * dpr)
+    const h = Math.round(fh * dpr)
+    canvas.width = w
+    canvas.height = h
+    // La máscara se calcula chica y se agranda: los bordes quedan suaves.
+    const mw = 220
+    const mh = Math.max(1, Math.round((mw * fh) / fw))
+    const mask = document.createElement('canvas')
+    mask.width = mw
+    mask.height = mh
+    const maskCtx = mask.getContext('2d', { willReadFrequently: true })
+
+    const load = (src) =>
+      new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => resolve(img)
+        img.onerror = reject
+        img.src = src
+      })
+    let cancelled = false
+    Promise.all([load(devSrc), load(NOISE)])
+      .then(([photo, noiseImg]) => {
+        if (cancelled) return
+        const kp = photo.naturalWidth / hero.w
+        const kn = noiseImg.naturalWidth / hero.w
+        maskCtx.drawImage(noiseImg, vx * kn, vy * kn, vw * kn, vh * kn, 0, 0, mw, mh)
+        const raw = maskCtx.getImageData(0, 0, mw, mh).data
+        const noise = new Uint8Array(mw * mh)
+        for (let i = 0; i < noise.length; i++) noise[i] = raw[i * 4]
+        const maskData = maskCtx.createImageData(mw, mh)
+        for (let i = 0; i < maskData.data.length; i += 4) {
+          maskData.data[i] = maskData.data[i + 1] = maskData.data[i + 2] = 255
+        }
+        devRef.current = {
+          ready: true,
+          noise,
+          maskData,
+          maskCtx,
+          mask,
+          ctx: canvas.getContext('2d'),
+          photo,
+          crop: { sx: vx * kp, sy: vy * kp, sw: vw * kp, sh: vh * kp },
+          w,
+          h,
+        }
+      })
+      .catch(() => {
+        // Si algo no carga, la intro sigue igual y al final aparece la foto.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [devSrc])
 
   useEffect(() => {
     if (mode !== 'none') playedThisLoad = true
@@ -90,7 +162,14 @@ export default function Intro() {
       paint(0)
       let start = 0
       let hold = 0
-      const delay = window.setTimeout(() => {
+      let waited = 0
+      let delay = 0
+      const begin = () => {
+        if (!devRef.current?.ready && waited < 2500) {
+          waited += 100
+          delay = window.setTimeout(begin, 100)
+          return
+        }
         const tick = (now) => {
           if (!start) start = now
           const t = Math.min(1, (now - start) / DEVELOP_MS)
@@ -99,7 +178,8 @@ export default function Intro() {
           else hold = window.setTimeout(() => setPhase('fix'), 450)
         }
         rafRef.current = requestAnimationFrame(tick)
-      }, 500)
+      }
+      delay = window.setTimeout(begin, 500)
       const skip = (e) => {
         if (e.type === 'keydown' && ['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return
         finish()
@@ -157,37 +237,7 @@ export default function Intro() {
       {mode !== 'none' && (
         <div className="intro-paper" ref={paperRef} aria-hidden="true">
           <div className="intro-frame" ref={frameRef}>
-            <svg viewBox={viewBox} preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <filter
-                  id="dev-noise"
-                  filterUnits="userSpaceOnUse"
-                  x="0"
-                  y="0"
-                  width={hero.w}
-                  height={hero.h}
-                  colorInterpolationFilters="sRGB"
-                >
-                  {/* Ruido precalculado: más liviano que feTurbulence en cada cuadro. */}
-                  <feImage
-                    href={NOISE}
-                    x="0"
-                    y="0"
-                    width={hero.w}
-                    height={hero.h}
-                    preserveAspectRatio="none"
-                  />
-                  <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 0" />
-                  <feComponentTransfer>
-                    <feFuncA ref={funcRef} type="linear" slope={SLOPE} intercept={-SLOPE} />
-                  </feComponentTransfer>
-                </filter>
-                <mask id="dev-mask" maskUnits="userSpaceOnUse" x="0" y="0" width={hero.w} height={hero.h}>
-                  <rect width={hero.w} height={hero.h} fill="#fff" filter="url(#dev-noise)" />
-                </mask>
-              </defs>
-              <image ref={imgRef} href={devSrc} width={hero.w} height={hero.h} mask="url(#dev-mask)" />
-            </svg>
+            <canvas ref={canvasRef} className="intro-canvas" />
             {/* La copia ya revelada: la misma foto y el mismo encuadre que el hero. */}
             <img
               className="intro-photo"
