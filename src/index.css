@@ -25,6 +25,7 @@
   --oxblood-deep: #1a0706;
   --safelight-glow: rgb(196 35 27 / 0.32);
   --gutter: clamp(16px, 4vw, 56px);
+  --section-y: clamp(72px, 9vw, 136px);
   /* Encuadre horizontal de la foto del hero (lo comparte la intro). */
   --hero-x: 0.42;
   --hero-pos: calc(var(--hero-x) * 100%) 50%;
@@ -46,7 +47,9 @@ body {
   font-family: var(--font-display);
   font-optical-sizing: auto;
   font-size: 1.0625rem;
-  line-height: 1.6;
+  font-weight: 450;
+  line-height: 1.62;
+  letter-spacing: 0.003em;
   background: var(--ink);
   overflow-x: clip;
 }
@@ -388,7 +391,7 @@ body {
   bottom: clamp(72px, 9vw, 108px);
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(5rem, 19.5vw, 22rem);
+  font-size: clamp(4.5rem, 16.5vw, 17rem);
   line-height: 0.78;
   letter-spacing: -0.055em;
   color: var(--paper);
@@ -448,15 +451,15 @@ body {
 .section-title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(3rem, 9vw, 8.5rem);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  font-size: clamp(2.6rem, 5.4vw, 5.25rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
 }
 
 /* ───────────── Hoja de contactos ───────────── */
 
 .sheet-wrap {
-  padding: clamp(56px, 9vw, 140px) clamp(8px, 2.5vw, 40px);
+  padding: var(--section-y) clamp(8px, 2.5vw, 40px);
   /* La hoja apoyada en la mesa, bajo la lámpara de seguridad. */
   background:
     radial-gradient(ellipse 70% 45% at 50% 0%, var(--safelight-glow), transparent 70%),
@@ -475,21 +478,11 @@ body {
     radial-gradient(ellipse at 100% 100%, rgb(120 100 70 / 0.12), transparent 55%);
 }
 .sheet-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px 32px;
-  margin-bottom: clamp(28px, 4vw, 56px);
+  display: grid;
+  gap: 14px;
+  margin-bottom: clamp(20px, 3vw, 40px);
 }
-.sheet-head p { max-width: 34ch; color: #4a453e; }
-.sheet-note {
-  font-family: var(--font-hand);
-  font-size: 1.6rem;
-  line-height: 1;
-  color: #3a3631;
-  transform: rotate(-3deg);
-}
+.sheet-head p { max-width: 52ch; color: #4a453e; }
 .strip-row { margin-top: clamp(28px, 4.5vw, 64px); }
 .strip-row:nth-child(odd) .strip { transform: rotate(-0.35deg); }
 .strip-row:nth-child(even) .strip { transform: rotate(0.3deg) translateX(0.6%); }
@@ -504,7 +497,7 @@ body {
   white-space: nowrap;
   font-family: var(--font-hand);
   font-weight: 400;
-  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-size: clamp(1.8rem, 2.6vw, 2.2rem);
   line-height: 1;
   color: #24211d;
 }
@@ -629,7 +622,8 @@ body {
 }
 
 @media (max-width: 767px) {
-  .frame { --frame-w: 72cqi; margin-right: 10px; }
+  .frame { --frame-w: 72cqi; margin-right: 10px; scroll-snap-align: center; }
+  .strip-frames { scroll-snap-type: x mandatory; }
   .strip-row:nth-child(n) .strip { transform: none; }
 }
 
@@ -642,7 +636,7 @@ body {
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   gap: clamp(40px, 7vw, 120px);
   align-items: start;
-  padding: clamp(80px, 12vw, 180px) var(--gutter);
+  padding: var(--section-y) var(--gutter);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -694,12 +688,13 @@ body {
 }
 .about-text p + p { margin-top: 1.1em; }
 .about-lede {
-  font-size: clamp(1.6rem, 3.1vw, 2.6rem);
-  line-height: 1.18;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 2.1vw, 1.85rem);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   font-style: italic;
-  margin: 0.6em 0 1em;
-  max-width: 22ch;
+  margin: 0.9em 0 1.1em;
+  max-width: 30ch;
 }
 .about-body { max-width: 52ch; color: #d9d2c6; }
 .facts {
@@ -726,8 +721,7 @@ body {
 /* ───────────── Encargos ───────────── */
 
 .commissions {
-  padding: clamp(64px, 9vw, 128px) max(var(--gutter), calc((100% - 1400px) / 2 + var(--gutter)))
-    clamp(80px, 12vw, 160px);
+  padding: var(--section-y) max(var(--gutter), calc((100% - 1400px) / 2 + var(--gutter)));
   background:
     radial-gradient(ellipse 60% 70% at 85% 0%, var(--safelight-glow), transparent 70%),
     var(--oxblood);
@@ -737,24 +731,24 @@ body {
 .commissions .commission:last-child { border-bottom-color: rgb(239 233 223 / 0.16); }
 .commissions .commission p { color: #e2d8cc; }
 .commission-foot a:hover { color: #fff; }
-.commission-list { margin-top: clamp(32px, 5vw, 64px); }
+.commission-list { margin-top: clamp(24px, 3.5vw, 48px); }
 .commission {
   display: grid;
-  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-  gap: 12px 48px;
-  align-items: baseline;
-  padding: clamp(20px, 3vw, 36px) 0;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 10px 48px;
+  align-items: start;
+  padding: clamp(22px, 2.6vw, 32px) 0;
   border-top: 1px solid #36322d;
 }
 .commission:last-child { border-bottom: 1px solid #36322d; }
 .commission h3 {
   font-weight: 400;
   font-style: italic;
-  font-size: clamp(2.2rem, 5.4vw, 4.8rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
 }
-.commission p { color: #d9d2c6; max-width: 46ch; }
+.commission p { color: #d9d2c6; max-width: 50ch; padding-top: 0.45em; }
 .commission-foot {
   margin-top: 28px;
   display: flex;
@@ -771,7 +765,7 @@ body {
 /* ───────────── Contacto: sobre de laboratorio ───────────── */
 
 .envelope-wrap {
-  padding: clamp(60px, 10vw, 140px) clamp(12px, 3vw, 40px) clamp(80px, 12vw, 160px);
+  padding: var(--section-y) clamp(12px, 3vw, 40px);
 }
 .envelope {
   position: relative;
@@ -807,7 +801,7 @@ body {
 }
 .envelope-head h2 {
   font-weight: 700;
-  font-size: clamp(1.7rem, 4.6vw, 3rem);
+  font-size: clamp(1.6rem, 3.6vw, 2.5rem);
   line-height: 0.95;
   letter-spacing: -0.03em;
   text-transform: uppercase;
@@ -1020,13 +1014,13 @@ body {
 /* ───────────── Serie ───────────── */
 
 .series-head {
-  padding: clamp(96px, 14vw, 180px) var(--gutter) clamp(40px, 6vw, 80px);
+  padding: clamp(96px, 11vw, 150px) var(--gutter) clamp(48px, 6vw, 80px);
 }
 .series-title {
   font-weight: 400;
-  font-size: clamp(3.4rem, 15vw, 17rem);
-  line-height: 0.82;
-  letter-spacing: -0.06em;
+  font-size: clamp(3rem, 10.5vw, 10.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
   margin: 28px 0 0 -0.05em;
   text-wrap: balance;
 }
@@ -1050,15 +1044,16 @@ body {
 .series-meta dt { color: #8f887c; }
 .series-meta dd { color: var(--paper); }
 .series-text {
-  max-width: 60ch;
-  font-size: clamp(1.0625rem, 1.3vw, 1.25rem);
-  line-height: 1.6;
+  max-width: 62ch;
+  font-size: clamp(1.0625rem, 1.1vw, 1.125rem);
+  line-height: 1.65;
   color: #d9d2c6;
 }
 .series-text p + p { margin-top: 1em; }
 .series-text p:first-child {
-  font-size: 1.3em;
-  line-height: 1.4;
+  font-size: 1.2em;
+  font-weight: 400;
+  line-height: 1.42;
   font-style: italic;
   color: var(--paper);
 }
@@ -1122,9 +1117,9 @@ body {
 .reel-frame figcaption b { color: rgb(222 186 120 / 0.9); font-weight: 500; }
 .reel-end-title {
   font-style: italic;
-  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, 3.6vw, 3.2rem);
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: rgb(222 186 120 / 0.9);
   margin-bottom: 12px;
 }
@@ -1198,9 +1193,9 @@ body {
 .next-kicker { color: var(--safelight-text); }
 .next-meta { color: #b5a99d; }
 .next-title {
-  font-size: clamp(2.2rem, 4.6vw, 4.4rem);
-  line-height: 0.95;
-  letter-spacing: -0.04em;
+  font-size: clamp(2rem, 3.6vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
   font-style: italic;
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -1230,7 +1225,7 @@ body {
 
 /* ───────────── Créditos ───────────── */
 
-.credits { padding: 120px var(--gutter) 80px; max-width: 1100px; }
+.credits { padding: clamp(96px, 11vw, 150px) var(--gutter) var(--section-y); max-width: 1100px; }
 .credits table { width: 100%; margin-top: 40px; border-collapse: collapse; }
 .credits td, .credits th { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid #2a2724; vertical-align: top; }
 .credits th { color: #a39b8e; font-weight: 400; }
