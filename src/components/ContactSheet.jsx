@@ -229,6 +229,14 @@ function Strip({ s, index, hint }) {
                       draggable="false"
                       data-loupe={f.src}
                     />
+                    {/* En touch no hay hover: una etiqueta deja claro que la foto se toca. */}
+                    <span className="frame-cta" aria-hidden="true">
+                      <svg viewBox="0 0 16 16">
+                        <circle cx="6.5" cy="6.5" r="4.5" />
+                        <path d="M10 10l4 4" />
+                      </svg>
+                      Ver serie
+                    </span>
                     <svg className="pencil" viewBox="-13.5 -14 177 128" aria-hidden="true">
                       <path d={pencilLoop(index * 31 + i * 7 + 3)} pathLength="1" />
                     </svg>

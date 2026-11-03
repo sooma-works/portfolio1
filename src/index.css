@@ -628,6 +628,38 @@ body {
     opacity 0s;
 }
 .frame:focus-visible { outline-offset: 6px; }
+/* Etiqueta "Ver serie" sobre cada foto, solo en pantallas táctiles. */
+.frame-cta {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px 6px 7px;
+  background: rgb(13 12 11 / 0.78);
+  color: var(--paper);
+  border: 1px solid rgb(196 35 27 / 0.7);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.frame-cta svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: var(--safelight-text);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+@media (hover: none), (pointer: coarse) {
+  .frame-cta { display: inline-flex; }
+}
+
 /* Indicación de deslizar: una nota a mano con flecha de lápiz graso, solo
    en pantallas táctiles (con mouse el rollo avanza solo). */
 .swipe-hint {
