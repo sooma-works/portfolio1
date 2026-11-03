@@ -404,7 +404,6 @@ body {
 .hero-name span { display: block; }
 @media (max-width: 600px) {
   .hero-name { bottom: 112px; }
-  .hero-crop { inset: 18% 10% 36% 8%; }
 }
 .hero-name span + span {
   font-style: italic;
@@ -426,8 +425,12 @@ body {
 .hero-crop {
   position: absolute;
   z-index: 1;
-  inset: 12% 8% 34% 18%;
+  /* Encuadra la red abierta, arriba y a la derecha del nombre: nunca lo cruza. */
+  inset: 11% 6% 44% 40%;
   pointer-events: none;
+}
+@media (max-width: 600px) {
+  .hero-crop { inset: 14% 7% 46% 9%; }
 }
 .hero-corner {
   position: absolute;
