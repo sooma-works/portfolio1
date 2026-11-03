@@ -215,7 +215,7 @@ export default function Intro() {
         top: '0px',
         width: `${window.innerWidth}px`,
         height: `${window.innerHeight}px`,
-        padding: '0px',
+        borderWidth: '0px',
       })
       const id = window.setTimeout(() => setPhase('fade'), GROW_MS)
       return () => window.clearTimeout(id)
