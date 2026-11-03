@@ -15,7 +15,7 @@ export default function Hero() {
       <img
         className="hero-img"
         src={hero.src}
-        srcSet={`${hero.small} 1200w, ${hero.src} 2400w`}
+        srcSet={`${hero.mobile} 800w, ${hero.small} 1200w, ${hero.src} 2400w`}
         sizes="100vw"
         width={hero.w}
         height={hero.h}

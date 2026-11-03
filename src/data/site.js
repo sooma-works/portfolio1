@@ -11,6 +11,7 @@ export const site = {
 export const hero = {
   src: '/img/hero/hero.jpg',
   small: '/img/hero/hero-1200.jpg',
+  mobile: '/img/hero/hero-800.jpg',
   w: 2400,
   h: 1624,
   alt: 'Un pescador metido en el río hasta la cintura lanza una red que se abre en el aire como una tela blanca.',

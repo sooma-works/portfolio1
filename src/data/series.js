@@ -4,6 +4,7 @@
 const p = (serie, file, w, h, alt, exif, place, year) => ({
   src: `/img/${serie}/${file}.jpg`,
   small: `/img/${serie}/${file}-800.jpg`,
+  thumb: `/img/${serie}/${file}-400.jpg`,
   w,
   h,
   alt,
