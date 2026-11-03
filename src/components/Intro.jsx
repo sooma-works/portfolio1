@@ -4,6 +4,7 @@ import { hasFinePointer, prefersReducedMotion } from '../lib/motion'
 
 const DEVELOP_MS = 2700
 const SLOPE = 5
+const NOISE = '/img/hero/revelado-ruido.jpg'
 // Duración de cada paso después del revelado (ms).
 const FIX_MS = 700 // se apaga la luz roja
 const GROW_MS = 1100 // la copia se agranda hasta ocupar la pantalla
@@ -28,11 +29,15 @@ export default function Intro() {
   const clockRef = useRef(null)
   const rafRef = useRef(0)
   const [touch] = useState(() => !hasFinePointer())
+  // En pantallas chicas el revelado usa la misma versión liviana que el hero.
+  const [devSrc] = useState(() =>
+    window.innerWidth * (window.devicePixelRatio || 1) < 1000 ? hero.mobile : hero.small,
+  )
 
   const paint = (t) => {
     const k = ease(t)
     // Umbral del ruido: a 0 no pasa nada de imagen, a 1 pasa toda.
-    const intercept = -SLOPE * 0.82 + k * (1 + SLOPE * 0.82)
+    const intercept = -SLOPE + k * (1 + SLOPE)
     funcRef.current?.setAttribute('intercept', intercept.toFixed(3))
     if (imgRef.current) {
       imgRef.current.style.filter = `brightness(${(2.1 - 1.1 * k).toFixed(3)}) contrast(${(0.45 + 0.55 * k).toFixed(3)})`
@@ -163,7 +168,15 @@ export default function Intro() {
                   height={hero.h}
                   colorInterpolationFilters="sRGB"
                 >
-                  <feTurbulence type="fractalNoise" baseFrequency="0.0032" numOctaves="4" seed="11" />
+                  {/* Ruido precalculado: más liviano que feTurbulence en cada cuadro. */}
+                  <feImage
+                    href={NOISE}
+                    x="0"
+                    y="0"
+                    width={hero.w}
+                    height={hero.h}
+                    preserveAspectRatio="none"
+                  />
                   <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1 0 0 0 0" />
                   <feComponentTransfer>
                     <feFuncA ref={funcRef} type="linear" slope={SLOPE} intercept={-SLOPE} />
@@ -173,13 +186,13 @@ export default function Intro() {
                   <rect width={hero.w} height={hero.h} fill="#fff" filter="url(#dev-noise)" />
                 </mask>
               </defs>
-              <image ref={imgRef} href={hero.small} width={hero.w} height={hero.h} mask="url(#dev-mask)" />
+              <image ref={imgRef} href={devSrc} width={hero.w} height={hero.h} mask="url(#dev-mask)" />
             </svg>
             {/* La copia ya revelada: la misma foto y el mismo encuadre que el hero. */}
             <img
               className="intro-photo"
               src={hero.src}
-              srcSet={`${hero.small} 1200w, ${hero.src} 2400w`}
+              srcSet={`${hero.mobile} 800w, ${hero.small} 1200w, ${hero.src} 2400w`}
               sizes="100vw"
               width={hero.w}
               height={hero.h}

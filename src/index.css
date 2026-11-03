@@ -269,6 +269,9 @@ body {
   background: var(--ink);
   cursor: pointer;
   transition: opacity 0.45s ease;
+  /* La intro no afecta el layout del resto: lo que cambia adentro se
+     recalcula solo acá (importa cuando la copia crece). */
+  contain: strict;
 }
 /* La luz de seguridad es una capa aparte: se apaga con un fundido, sin cortes. */
 .intro::before {
@@ -292,6 +295,7 @@ body {
   background: #fbf8f2;
   box-shadow: 0 30px 80px rgb(0 0 0 / 0.55);
   padding: clamp(10px, 1.6vw, 22px);
+  contain: layout paint;
 }
 @media (max-width: 600px) {
   .intro-paper { width: 84vw; aspect-ratio: 4 / 5; }
