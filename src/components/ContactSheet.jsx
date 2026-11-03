@@ -86,6 +86,20 @@ function useEndlessStrip(ref, direction) {
       visible = entry.isIntersecting
     })
     io.observe(el)
+    // Las copias del rollo quedan fuera de pantalla hacia los costados y el
+    // lazy loading no las carga hasta que aparecen: se ve el cuadro vacío.
+    // Cuando la tira se acerca, se cargan todas (son las mismas 10 fotos).
+    const preload = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        el.querySelectorAll('img[loading="lazy"]').forEach((img) => {
+          img.loading = 'eager'
+        })
+        preload.disconnect()
+      },
+      { rootMargin: '600px 0px' },
+    )
+    preload.observe(el)
     // Al arrancar, la portada queda centrada (así el lápiz no se corta).
     const frame = el.querySelector('.frame')
     jump(setWidth() - (frame ? (el.clientWidth - frame.offsetWidth) / 2 : 0))
@@ -107,6 +121,7 @@ function useEndlessStrip(ref, direction) {
       window.clearTimeout(resumeTimer)
       window.clearTimeout(settleTimer)
       io.disconnect()
+      preload.disconnect()
       ro.disconnect()
       el.removeEventListener('scroll', onScroll)
       el.removeEventListener('scrollend', onScrollEnd)
@@ -211,9 +226,6 @@ export default function ContactSheet() {
         {series.map((s, i) => (
           <Strip key={s.slug} s={s} index={i} />
         ))}
-        <p className="sheet-note" aria-hidden="true">
-          hoja de contactos · 4 rollos
-        </p>
       </div>
     </section>
   )
