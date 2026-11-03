@@ -210,11 +210,15 @@ export default function Intro() {
         aspectRatio: 'auto',
       })
       void el.offsetWidth
+      // El destino es la foto del hero tal como está en pantalla (y no el
+      // alto de la ventana): en iPhone las barras del navegador hacen que
+      // no coincidan, y al terminar la foto "saltaba".
+      const target = document.querySelector('.hero-img')?.getBoundingClientRect()
       Object.assign(el.style, {
-        left: '0px',
-        top: '0px',
-        width: `${window.innerWidth}px`,
-        height: `${window.innerHeight}px`,
+        left: `${target ? target.left : 0}px`,
+        top: `${target ? target.top : 0}px`,
+        width: `${target ? target.width : window.innerWidth}px`,
+        height: `${target ? target.height : window.innerHeight}px`,
         borderWidth: '0px',
       })
       const id = window.setTimeout(() => setPhase('fade'), GROW_MS)
