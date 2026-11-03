@@ -12,14 +12,6 @@ import NotFound from './pages/NotFound'
 const Series = lazy(() => import('./pages/Series'))
 const Credits = lazy(() => import('./pages/Credits'))
 
-// Precargar las series cuando el navegador está libre, así el obturador no
-// abre sobre una página vacía.
-if (typeof window !== 'undefined') {
-  const prefetch = () => import('./pages/Series')
-  if ('requestIdleCallback' in window) window.requestIdleCallback(prefetch, { timeout: 4000 })
-  else window.setTimeout(prefetch, 2500)
-}
-
 export default function App() {
   return (
     <ShutterProvider>

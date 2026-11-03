@@ -51,6 +51,15 @@ export function ShutterProvider({ children }) {
 
 const useShutter = () => useContext(ShutterContext)
 
+// El código de las series (con GSAP) se descarga recién cuando alguien
+// muestra intención de abrir una: mouse encima, foco o primer toque.
+let seriesPrefetched = false
+const prefetchSeries = () => {
+  if (seriesPrefetched) return
+  seriesPrefetched = true
+  import('../pages/Series')
+}
+
 // Link que navega "a través" del obturador. Respeta clic con modificadores
 // (abrir en pestaña nueva) y los anclas dentro de la misma página.
 export function ShutterLink({ to, onClick, delay = 0, children, ...props }) {
@@ -75,8 +84,10 @@ export function ShutterLink({ to, onClick, delay = 0, children, ...props }) {
     else go(to)
   }
 
+  const intent = to.startsWith('/series/') ? prefetchSeries : undefined
+
   return (
-    <a href={to} onClick={handleClick} {...props}>
+    <a href={to} onClick={handleClick} onPointerEnter={intent} onFocus={intent} onTouchStart={intent} {...props}>
       {children}
     </a>
   )

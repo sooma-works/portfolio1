@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { series } from '../data/series'
 import { pencilLoop } from '../lib/pencil'
 import { hasFinePointer, prefersReducedMotion } from '../lib/motion'
@@ -9,8 +9,11 @@ import { ShutterLink } from './Shutter'
 const COPIES = 3
 const DRIFT = 12 // px por segundo
 
-function useEndlessStrip(ref, direction) {
+function useEndlessStrip(ref, direction, active) {
   useEffect(() => {
+    // Se arma recién cuando la tira está por aparecer: medirla antes fuerza el
+    // layout de toda la página justo mientras carga.
+    if (!active) return
     const el = ref.current
     const setWidth = () => el.scrollWidth / COPIES
     // En pantallas táctiles el rollo no avanza solo: el dedo manda.
@@ -86,20 +89,6 @@ function useEndlessStrip(ref, direction) {
       visible = entry.isIntersecting
     })
     io.observe(el)
-    // Las copias del rollo quedan fuera de pantalla hacia los costados y el
-    // lazy loading no las carga hasta que aparecen: se ve el cuadro vacío.
-    // Cuando la tira se acerca, se cargan todas (son las mismas 10 fotos).
-    const preload = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return
-        el.querySelectorAll('img[loading="lazy"]').forEach((img) => {
-          img.loading = 'eager'
-        })
-        preload.disconnect()
-      },
-      { rootMargin: '600px 0px' },
-    )
-    preload.observe(el)
     // Al arrancar, la portada queda centrada (así el lápiz no se corta).
     const frame = el.querySelector('.frame')
     jump(setWidth() - (frame ? (el.clientWidth - frame.offsetWidth) / 2 : 0))
@@ -121,7 +110,6 @@ function useEndlessStrip(ref, direction) {
       window.clearTimeout(resumeTimer)
       window.clearTimeout(settleTimer)
       io.disconnect()
-      preload.disconnect()
       ro.disconnect()
       el.removeEventListener('scroll', onScroll)
       el.removeEventListener('scrollend', onScrollEnd)
@@ -132,7 +120,7 @@ function useEndlessStrip(ref, direction) {
       el.removeEventListener('focusin', onFocusIn)
       el.removeEventListener('focusout', onFocusOut)
     }
-  }, [ref, direction])
+  }, [ref, direction, active])
 }
 
 // Con el dedo no hay hover: al tocar un fotograma, el lápiz lo marca y
@@ -146,8 +134,24 @@ function Strip({ s, index }) {
   const frames = [s.cover, ...s.photos]
   const firstFrame = 12 + index * 14
   const scroller = useRef(null)
+  const [near, setNear] = useState(false)
   const edge = `${s.roll.toUpperCase()} · SAFETY FILM`
-  useEndlessStrip(scroller, index % 2 ? -1 : 1)
+  // Las fotos se piden recién cuando la tira está por aparecer: así no le
+  // sacan ancho de banda a la foto del inicio. Se cargan todas las copias
+  // juntas para que el rollo infinito nunca muestre un cuadro vacío.
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        setNear(true)
+        io.disconnect()
+      },
+      { rootMargin: '300px 0px' },
+    )
+    io.observe(scroller.current)
+    return () => io.disconnect()
+  }, [])
+  useEndlessStrip(scroller, index % 2 ? -1 : 1, near)
 
   return (
     <div className="strip-row">
@@ -161,7 +165,8 @@ function Strip({ s, index }) {
       <div className="strip">
         <div className="strip-frames" ref={scroller}>
           <div className="strip-track">
-            {Array.from({ length: COPIES }, (_, copy) =>
+            {/* Hasta que la tira se acerca, solo la copia principal (menos DOM al cargar). */}
+            {(near ? Array.from({ length: COPIES }, (_, i) => i) : [1]).map((copy) =>
               frames.map((f, i) => {
                 const n = firstFrame + i
                 const main = copy === 1
@@ -187,11 +192,12 @@ function Strip({ s, index }) {
                     </span>
                     <img
                       className="frame-img"
-                      src={f.small}
+                      src={near ? f.thumb : undefined}
+                      srcSet={near ? `${f.thumb} 400w, ${f.small} 800w` : undefined}
+                      sizes="(max-width: 767px) 72vw, 18vw"
                       width={f.w > f.h ? 800 : Math.round((800 * f.w) / f.h)}
                       height={f.w > f.h ? Math.round((800 * f.h) / f.w) : 800}
                       alt={main && i > 0 ? f.alt : ''}
-                      loading="lazy"
                       decoding="async"
                       draggable="false"
                       data-loupe={f.src}
