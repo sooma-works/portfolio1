@@ -2,6 +2,7 @@ import { hero, site } from '../data/site'
 
 // Marcas de recorte en lápiz graso: el único rojo del hero. Cada esquina
 // es un trazo suelto, apenas torcido, como hecho a mano sobre la copia.
+// El trazo escala con la esquina (viewBox de 48), por eso va fino.
 const corners = [
   { pos: 'tl', d: 'M3 44 C4 30 2 16 4 4 C16 2 30 4 44 3' },
   { pos: 'tr', d: 'M4 3 C18 4 30 2 42 4 C44 16 42 30 44 43' },
@@ -26,7 +27,7 @@ export default function Hero() {
       <div className="hero-crop" aria-hidden="true">
         {corners.map((c) => (
           <svg key={c.pos} className={`hero-corner hero-corner--${c.pos}`} viewBox="0 0 48 48">
-            <path d={c.d} pathLength="1" fill="none" stroke="var(--safelight)" strokeWidth="2.6" strokeLinecap="round" />
+            <path d={c.d} pathLength="1" fill="none" stroke="var(--safelight)" strokeWidth="1.9" strokeLinecap="round" />
           </svg>
         ))}
       </div>
